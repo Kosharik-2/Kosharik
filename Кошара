@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кошарик: Покорми кота</title>
+    <style>
+        body { 
+            background: #1a1a1a; 
+            color: white; 
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding-top: 30px;
+        }
+        button { 
+            background: #ffcc00; 
+            border: none; 
+            padding: 15px 30px; 
+            font-size: 18px; 
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        button:active { transform: scale(0.95); }
+        .shop-container {
+            margin-top: 30px;
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        .shop-btn {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🐾 Кормежка Кошарика</h1>
+    <p>Марио ждет вкусняшку!</p>
+    
+    <h2 id="score">Сытость: 0</h2>
+    <h3 id="power">Сила клика: 1</h3>
+    
+    <button onclick="feedCat()">Покормить 🐟</button>
+
+    <div class="shop-container">
+        <h3>🛒 Магазин</h3>
+        <p>Вкусный корм (+1 к клику)</p>
+        <p>Цена: <span id="cost">15</span> сытости</p>
+        <button class="shop-btn" onclick="buyUpgrade()">Купить</button>
+    </div>
+
+    <script>
+        let score = 0;
+        let clickPower = 1;
+        let upgradeCost = 15;
+
+        function feedCat() {
+            score += clickPower;
+            document.getElementById('score').innerText = 'Сытость: ' + score;
+        }
+
+        function buyUpgrade() {
+            if (score >= upgradeCost) {
+                score -= upgradeCost;
+                clickPower += 1;
+                upgradeCost = Math.round(upgradeCost * 1.5);
+                
+                document.getElementById('score').innerText = 'Сытость: ' + score;
+                document.getElementById('power').innerText = 'Сила клика: ' + clickPower;
+                document.getElementById('cost').innerText = upgradeCost;
+            } else {
+                alert('Недостаточно сытости для покупки!');
+            }
+        }
+    </script>
+</body>
+</html>
