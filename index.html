@@ -1,0 +1,414 @@
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Интерактивный Календарь Ромы</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#094d74',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .struck-through {
+            position: relative;
+            background-color: #f3f4f6 !important;
+            color: #9ca3af !important;
+        }
+        .struck-through .date-number {
+            text-decoration: line-through;
+            text-decoration-color: #ef4444;
+            text-decoration-thickness: 3px;
+        }
+        .day-card {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .day-card:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans antialiased selection:bg-sky-500 selection:text-white p-3 sm:p-6">
+
+    <div class="max-w-4xl mx-auto space-y-6">
+        
+        <!-- Header Section -->
+        <header class="bg-slate-800/80 backdrop-blur border border-slate-700/60 rounded-2xl p-4 sm:p-6 shadow-xl flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="p-3 bg-gradient-to-tr from-sky-500 to-indigo-600 rounded-xl shadow-lg shadow-sky-500/20">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-sky-200 to-sky-400 bg-clip-text text-transparent">
+                        Интерактивный Календарь Ромы
+                    </h1>
+                    <p class="text-xs sm:text-sm text-slate-400 font-medium">Период: Октябрь 2026 — Август 2027</p>
+                </div>
+            </div>
+
+            <!-- Global Controls & Counter -->
+            <div class="flex items-center gap-3 bg-slate-900/60 border border-slate-700/80 px-4 py-2 rounded-xl">
+                <div class="text-center">
+                    <div class="text-xs text-slate-400 uppercase font-semibold tracking-wider">Зачёркнуто дней</div>
+                    <div class="text-lg font-bold text-sky-400" id="totalStruckCount">0 / 0</div>
+                </div>
+                <button id="resetBtn" title="Сбросить все зачёркивания" class="ml-2 p-2 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-rose-400 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <section class="bg-slate-800/80 border border-slate-700/60 rounded-2xl p-4 shadow-xl space-y-4">
+            
+            <div class="flex items-center justify-between gap-2">
+                <button id="prevMonthBtn" class="flex items-center gap-1 px-3 sm:px-4 py-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed rounded-xl font-medium text-sm transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    <span class="hidden sm:inline">Пред.</span>
+                </button>
+
+                <div class="text-center">
+                    <h2 id="currentMonthTitle" class="text-xl sm:text-2xl font-bold text-white tracking-wide">
+                        Октябрь 2026
+                    </h2>
+                </div>
+
+                <button id="nextMonthBtn" class="flex items-center gap-1 px-3 sm:px-4 py-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed rounded-xl font-medium text-sm transition">
+                    <span class="hidden sm:inline">След.</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </button>
+            </div>
+
+            <!-- Quick Month Selector Buttons -->
+            <div id="monthChips" class="flex gap-1.5 overflow-x-auto pb-2 scrollbar-none pt-1">
+                <!-- Dynamic Chips -->
+            </div>
+        </section>
+
+        <main class="bg-slate-800/80 border border-slate-700/60 rounded-2xl p-3 sm:p-5 shadow-2xl space-y-3">
+            
+            <!-- Weekday Headers -->
+            <div class="grid grid-cols-7 gap-1.5 text-center font-bold text-xs sm:text-sm text-sky-400 uppercase tracking-wider py-2 bg-slate-900/40 rounded-xl">
+                <div>Пн</div>
+                <div>Вт</div>
+                <div>Ср</div>
+                <div>Чт</div>
+                <div>Пт</div>
+                <div class="text-rose-400">Сб</div>
+                <div class="text-rose-400">Вс</div>
+            </div>
+
+            <!-- Days Grid -->
+            <div id="calendarDaysGrid" class="grid grid-cols-7 gap-1.5 sm:gap-2.5">
+                <!-- Days inserted dynamically -->
+            </div>
+        </main>
+
+        <!-- Legend / Info Footer -->
+        <footer class="bg-slate-800/50 border border-slate-700/40 rounded-xl p-4 text-xs sm:text-sm text-slate-400 flex flex-wrap gap-4 justify-between items-center">
+            <div class="flex flex-wrap gap-3 items-center">
+                <span class="font-semibold text-slate-300">Легенда меток:</span>
+                <span class="inline-flex items-center gap-1 bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded border border-amber-500/30">[8] Сегодня</span>
+                <span class="inline-flex items-center gap-1 bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">Н / К8ноябряН - Каникулы</span>
+                <span class="inline-flex items-center gap-1 bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded border border-purple-500/30">Др - День рождения</span>
+            </div>
+            <div class="text-slate-500 text-xs">
+                💡 Нажми на число, чтобы зачеркнуть день
+            </div>
+        </footer>
+
+    </div>
+
+    <script>
+        // Definition of months range: Oct 2026 - Aug 2027
+        const monthsData = [
+            { year: 2026, month: 9, name: 'Октябрь 2026' },   // Month 9 is October (0-indexed)
+            { year: 2026, month: 10, name: 'Ноябрь 2026' },
+            { year: 2026, month: 11, name: 'Декабрь 2026' },
+            { year: 2027, month: 0, name: 'Январь 2027' },
+            { year: 2027, month: 1, name: 'Февраль 2027' },
+            { year: 2027, month: 2, name: 'Март 2027' },
+            { year: 2027, month: 3, name: 'Апрель 2027' },
+            { year: 2027, month: 4, name: 'Май 2027' },
+            { year: 2027, month: 5, name: 'Июнь 2027' },
+            { year: 2027, month: 6, name: 'Июль 2027' },
+            { year: 2027, month: 7, name: 'Август 2027' }
+        ];
+
+        // System predetermined labels dictionary
+        // Format: 'YYYY-MM-DD': { tag: string, styleClass: string }
+        const defaultTags = {
+            '2026-10-08': { tag: '[8]', type: 'today' },
+            
+            // Autumn Holidays 'Н' (24 Oct 2026 - 07 Nov 2026)
+            '2026-10-24': { tag: 'Н', type: 'holiday' },
+            '2026-10-25': { tag: 'Н', type: 'holiday' },
+            '2026-10-26': { tag: 'Н', type: 'holiday' },
+            '2026-10-27': { tag: 'Н', type: 'holiday' },
+            '2026-10-28': { tag: 'Н', type: 'holiday' },
+            '2026-10-29': { tag: 'Н', type: 'holiday' },
+            '2026-10-30': { tag: 'Н', type: 'holiday' },
+            '2026-10-31': { tag: 'Н', type: 'holiday' },
+            '2026-11-01': { tag: 'Н', type: 'holiday' },
+            '2026-11-02': { tag: 'Н', type: 'holiday' },
+            '2026-11-03': { tag: 'Н', type: 'holiday' },
+            '2026-11-04': { tag: 'Н', type: 'holiday' },
+            '2026-11-05': { tag: 'Н', type: 'holiday' },
+            '2026-11-06': { tag: 'Н', type: 'holiday' },
+            '2026-11-07': { tag: 'Н', type: 'holiday' },
+
+            // Special end of holiday marker
+            '2026-11-08': { tag: 'К8ноябряН', type: 'holiday-end' },
+
+            // Birthday tag
+            '2027-07-12': { tag: 'Др 🎂', type: 'birthday' }
+        };
+
+        // State variables
+        let currentMonthIndex = 0;
+        let struckDays = new Set(); // Stores date keys e.g. '2026-10-08'
+        let customUserTags = {};    // Custom labels added by user
+
+        // DOM Element references
+        const currentMonthTitle = document.getElementById('currentMonthTitle');
+        const calendarDaysGrid = document.getElementById('calendarDaysGrid');
+        const prevMonthBtn = document.getElementById('prevMonthBtn');
+        const nextMonthBtn = document.getElementById('nextMonthBtn');
+        const monthChips = document.getElementById('monthChips');
+        const totalStruckCount = document.getElementById('totalStruckCount');
+        const resetBtn = document.getElementById('resetBtn');
+
+        function initApp() {
+            renderMonthChips();
+            renderCalendar();
+
+            // Event Listeners for Nav
+            prevMonthBtn.addEventListener('click', () => {
+                if (currentMonthIndex > 0) {
+                    currentMonthIndex--;
+                    renderCalendar();
+                }
+            });
+
+            nextMonthBtn.addEventListener('click', () => {
+                if (currentMonthIndex < monthsData.length - 1) {
+                    currentMonthIndex++;
+                    renderCalendar();
+                }
+            });
+
+            resetBtn.addEventListener('click', () => {
+                if (struckDays.size > 0) {
+                    struckDays.clear();
+                    renderCalendar();
+                }
+            });
+        }
+
+        // Render Quick Month selector chips
+        function renderMonthChips() {
+            monthChips.innerHTML = '';
+            monthsData.forEach((m, idx) => {
+                const btn = document.createElement('button');
+                btn.className = `px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
+                    idx === currentMonthIndex 
+                        ? 'bg-sky-500 text-white shadow-md shadow-sky-500/30' 
+                        : 'bg-slate-700/60 text-slate-300 hover:bg-slate-700'
+                }`;
+                // Short month name
+                btn.textContent = m.name.split(' ')[0];
+                btn.addEventListener('click', () => {
+                    currentMonthIndex = idx;
+                    renderCalendar();
+                });
+                monthChips.appendChild(btn);
+            });
+        }
+
+        // Helper to format key YYYY-MM-DD
+        function formatDateKey(year, monthIdx, day) {
+            const m = String(monthIdx + 1).padStart(2, '0');
+            const d = String(day).padStart(2, '0');
+            return `${year}-${m}-${d}`;
+        }
+
+        function renderCalendar() {
+            const { year, month, name } = monthsData[currentMonthIndex];
+
+            // Update Titles & Buttons
+            currentMonthTitle.textContent = name;
+            prevMonthBtn.disabled = currentMonthIndex === 0;
+            nextMonthBtn.disabled = currentMonthIndex === monthsData.length - 1;
+
+            // Highlight active chip
+            Array.from(monthChips.children).forEach((chip, idx) => {
+                if (idx === currentMonthIndex) {
+                    chip.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all bg-sky-500 text-white shadow-md shadow-sky-500/30';
+                } else {
+                    chip.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all bg-slate-700/60 text-slate-300 hover:bg-slate-700';
+                }
+            });
+
+            calendarDaysGrid.innerHTML = '';
+
+            // Calculate grid padding for Monday start
+            const firstDayIndex = new Date(year, month, 1).getDay(); // 0 is Sunday
+            // Convert to Monday start: Mon -> 0, Tue -> 1, ..., Sun -> 6
+            const startOffset = (firstDayIndex === 0 ? 7 : firstDayIndex) - 1;
+
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            // Render Empty leading slots
+            for (let i = 0; i < startOffset; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.className = 'h-24 sm:h-28 rounded-xl bg-slate-900/20 border border-slate-800/40 opacity-30';
+                calendarDaysGrid.appendChild(emptyCell);
+            }
+
+            // Render Actual Month Days
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateKey = formatDateKey(year, month, day);
+                const isStruck = struckDays.has(dateKey);
+                const defaultTagObj = defaultTags[dateKey];
+                const customTag = customUserTags[dateKey];
+
+                const dayCard = document.createElement('div');
+                
+                // Base classes
+                let cardStyle = 'day-card h-24 sm:h-28 rounded-xl p-1.5 sm:p-2 border flex flex-col justify-between cursor-pointer select-none transition-all relative overflow-hidden ';
+
+                if (isStruck) {
+                    cardStyle += 'struck-through border-slate-700/50 ';
+                } else if (defaultTagObj?.type === 'today') {
+                    cardStyle += 'bg-slate-800 border-amber-500/80 ring-2 ring-amber-500/30 ';
+                } else if (defaultTagObj?.type === 'birthday') {
+                    cardStyle += 'bg-slate-800 border-purple-500/80 ring-2 ring-purple-500/30 ';
+                } else if (defaultTagObj?.type === 'holiday' || defaultTagObj?.type === 'holiday-end') {
+                    cardStyle += 'bg-slate-800 border-emerald-500/60 ';
+                } else {
+                    cardStyle += 'bg-slate-800/90 hover:bg-slate-700/80 border-slate-700/70 ';
+                }
+
+                dayCard.className = cardStyle;
+
+                // Day header (Number + Custom Label button)
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'flex justify-between items-start';
+
+                const dayNumber = document.createElement('span');
+                dayNumber.className = `date-number font-extrabold text-sm sm:text-base ${
+                    isStruck 
+                        ? 'text-slate-500' 
+                        : (defaultTagObj?.type === 'today' ? 'text-amber-400' : 'text-slate-100')
+                }`;
+                dayNumber.textContent = day;
+
+                // Edit tag button
+                const editBtn = document.createElement('button');
+                editBtn.className = 'text-[10px] opacity-60 hover:opacity-100 text-slate-300 bg-slate-900/60 px-1 py-0.5 rounded transition';
+                editBtn.innerHTML = '✏️';
+                editBtn.title = 'Добавить заметку';
+                editBtn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // prevent strike toggle
+                    promptCustomTag(dateKey);
+                });
+
+                headerDiv.appendChild(dayNumber);
+                headerDiv.appendChild(editBtn);
+                dayCard.appendChild(headerDiv);
+
+                // Middle Container for Tags
+                const tagsContainer = document.createElement('div');
+                tagsContainer.className = 'flex flex-col gap-1 items-start my-auto w-full overflow-hidden';
+
+                // Display Default Built-in Tag
+                if (defaultTagObj) {
+                    const tagBadge = document.createElement('span');
+                    let tagClass = 'text-[10px] sm:text-xs px-1.5 py-0.5 rounded font-bold tracking-tight truncate max-w-full ';
+                    
+                    if (defaultTagObj.type === 'today') {
+                        tagClass += 'bg-amber-500/20 text-amber-300 border border-amber-500/40';
+                    } else if (defaultTagObj.type === 'holiday') {
+                        tagClass += 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+                    } else if (defaultTagObj.type === 'holiday-end') {
+                        tagClass += 'bg-emerald-600/30 text-emerald-200 border border-emerald-400/50 font-black';
+                    } else if (defaultTagObj.type === 'birthday') {
+                        tagClass += 'bg-purple-500/20 text-purple-300 border border-purple-500/40';
+                    }
+
+                    tagBadge.className = tagClass;
+                    tagBadge.textContent = defaultTagObj.tag;
+                    tagsContainer.appendChild(tagBadge);
+                }
+
+                // Display User Custom Tag if present
+                if (customTag) {
+                    const userBadge = document.createElement('span');
+                    userBadge.className = 'text-[10px] sm:text-xs bg-sky-500/20 text-sky-300 border border-sky-500/40 px-1.5 py-0.5 rounded font-medium truncate max-w-full';
+                    userBadge.textContent = customTag;
+                    tagsContainer.appendChild(userBadge);
+                }
+
+                dayCard.appendChild(tagsContainer);
+
+                // Toggle Strike status on card click
+                dayCard.addEventListener('click', () => {
+                    if (struckDays.has(dateKey)) {
+                        struckDays.delete(dateKey);
+                    } else {
+                        struckDays.add(dateKey);
+                    }
+                    renderCalendar();
+                });
+
+                calendarDaysGrid.appendChild(dayCard);
+            }
+
+            updateCounter();
+        }
+
+        function promptCustomTag(dateKey) {
+            const existing = customUserTags[dateKey] || '';
+            const val = prompt('Введи твою метку или задачу для этой даты:', existing);
+            if (val !== null) {
+                if (val.trim() === '') {
+                    delete customUserTags[dateKey];
+                } else {
+                    customUserTags[dateKey] = val.trim();
+                }
+                renderCalendar();
+            }
+        }
+
+        function updateCounter() {
+            totalStruckCount.textContent = `${struckDays.size} дн.`;
+        }
+
+        // Start App
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
+```
